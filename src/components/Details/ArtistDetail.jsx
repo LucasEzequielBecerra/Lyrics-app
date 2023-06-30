@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { requestsOneItem } from '../../services/requestsOneItem'
-import requestTop5 from '../../services/artist/requestTop5'
-import { Box, CircularProgress, Typography, Button, List, ListItem, IconButton, Avatar } from '@mui/joy'
+import requestTop10 from '../../services/artist/requestTop10'
+import Loader from '../Loader'
+import { Box, Typography, Button, List, ListItem, IconButton, Avatar, ListDivider } from '@mui/joy'
 import { ListItemAvatar, ListItemText } from '@mui/material'
 import { ArrowBackIos } from '@mui/icons-material'
 import { grey } from '@mui/material/colors'
 
-function formatNumber(num) {
+function formatNumber (num) {
   if (num >= 1000000) {
     const million = num / 1000000
     return million.toFixed(1) + ' M'
@@ -23,13 +24,17 @@ const ArtistDetail = () => {
   const { id } = useParams()
 
   const [artist, setArtist] = useState({})
+
+  const [top10, setTop10] = useState({})
+  const [showMore, setShowMore] = useState(false)
+
   const [load, setLoad] = useState(true)
 
   useEffect(() => {
     const requestArtist = async () => {
       try {
         setArtist(await requestsOneItem('artists', id))
-        console.log(await requestTop5(id))
+        setTop10(await requestTop10(id))
       } catch (error) {
         console.log(error)
       } finally {
@@ -42,7 +47,7 @@ const ArtistDetail = () => {
   return (
     <>
       {load
-        ? <CircularProgress color='primary' />
+        ? <Loader />
         : <>
           <Box sx={{
             position: 'absolute',
@@ -76,18 +81,48 @@ const ArtistDetail = () => {
               <Typography sx={{ color: grey[50] }}>{formatNumber(artist.followers.total)} followers</Typography>
             </Box>
           </Box>
-          <List>
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar>
-                  {/* <FolderIcon /> */}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary="Single-line item"
-              />
-            </ListItem>
-          </List>
+          <Box sx={{ padding: '1rem', backgroundColor: '#252525' }}>
+            <List>
+              {/* {for (let i = 1; i <= 5; i++) {
+                return (
+                  <>
+                    <ListItem key={top10?.tracks[i].id}>
+                      <Typography sx={{ color: grey[500], paddingRight: '1rem' }}>{i}</Typography>
+                      <ListItemAvatar>
+                        <Avatar>
+                          <img src={ top10?.tracks[i].album.images[0].url } alt={top10?.tracks[i].album.name} />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText sx={{ color: grey[300] }}
+                        primary={top10?.tracks[i].name}
+                      />
+                    </ListItem>
+                    <ListDivider />
+                  </>
+                )
+              }}
+              // {top10?.tracks.map(song => { */
+              //   return (
+              //     <>
+              //       <ListItem key={song.id}>
+              //         <Typography sx={{ color: grey[500], paddingRight: '1rem' }}>1</Typography>
+              //         <ListItemAvatar>
+              //           <Avatar>
+              //             <img src={ song.album.images[0].url } alt={song.album.name} />
+              //           </Avatar>
+              //         </ListItemAvatar>
+              //         <ListItemText sx={{ color: grey[300] }}
+              //           primary={song.name}
+              //         />
+              //       </ListItem>
+              //       <ListDivider />
+              //     </>
+              //   )
+              // }
+              // )}
+            }
+            </List>
+          </Box>
         </>
       }
     </>
